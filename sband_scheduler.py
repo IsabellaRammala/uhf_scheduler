@@ -2,7 +2,7 @@ import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord, EarthLocation
 import pandas as pd
-import sys, math
+import sys, math, os
 import matplotlib.pyplot as plt
 import datetime
 from pytz import timezone
@@ -236,7 +236,7 @@ def schedule_target(target_df, target_exposure_time, current_time_utc, current_t
         schedule.append([current_time_utc.strftime(format='%Y-%m-%d %H:%M:%S'), current_time_lst.time(), target['Pointing'].iloc[0], target['RA'].iloc[0], \
         target['DEC'].iloc[0], target['Obs_type'].iloc[0], target_exposure_time])
         # Add the target to the list of targets observed
-        targets_observed.append([target['Pointing'].iloc[0], target['RA'].iloc[0], target['DEC'].iloc[0]])
+        targets_observed.append([target['Pointing'].iloc[0], target['RA'].iloc[0], target['DEC'].iloc[0], current_time_utc.strftime(format='%Y-%m-%d %H:%M:%S'), current_time_lst.time()])
 
         # Update the current time
         current_time_utc = current_time_utc + datetime.timedelta(seconds=target_exposure_time)
@@ -267,7 +267,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
     """
     #Build the scheduler
     schedule = []
-    targets_observed = [] # List of targets that have been observed. Change this later to read a file.
+    targets_observed = []
     # Be careful here. UTC times are given by user hence will have different dates. LST times will always have datetime.today() as the date
     current_time_utc = start_time_utc
     current_time_lst = start_time_lst
@@ -317,7 +317,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         if current_time_utc > end_time_utc:
             break
     
-    return schedule
+    return schedule, targets_observed
 
 def convert_meerkat_lst_to_utc(lst, date, meerkat):
 
@@ -437,7 +437,17 @@ def main(config, output_file):
     phase_cals = pd.read_csv('rise_set_time_phase_cal.csv')
     flux_cals = pd.read_csv('rise_set_time_flux_cal.csv')
     pol_cals = pd.read_csv('rise_set_time_pol_cal.csv')
-
+    output_targets_observed ='targets_already_scheduled.csv'
+    targets_already_scheduled = []
+    if os.path.isfile(output_targets_observed):
+        targets_already_scheduled = pd.read_csv(output_targets_observed)
+        targets_already_scheduled_list = targets_already_scheduled['Pointing'].to_list()
+    # If targets have been previously scheduled, then remove them from the list of targets to be scheduled
+    if targets_already_scheduled_list:
+        targets = targets[~targets['Pointing'].isin(targets_already_scheduled_list)]
+        print('Removed %d targets from previous runs that have already been scheduled, we have %d targets left' % (len(targets_already_scheduled_list), len(targets)))
+    else:
+        print('No targets from previous runs have been scheduled yet. Will use the full list of targets')
 
     # Convert the rise and set times to datetime64
     targets['Rise_time_sidereal_20_deg'] = targets['Rise_time_sidereal_20_deg'].astype('datetime64[ns]')
@@ -506,7 +516,7 @@ def main(config, output_file):
     # Sort phase calibrators by Right Ascension
     phase_cals = phase_cals.sort_values(by=['RA'])
 
-    schedule = run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, flux_cals, pol_cals, \
+    schedule, targets_observed = run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, flux_cals, pol_cals, \
         targets, phase_cals, flux_calib_exposure_time, pol_calib_exposure_time, target_exposure_time, phase_calib_exposure_time, slew_time)
 
     final_schedule = pd.DataFrame(schedule, columns=['Start Time UTC', 'Start Time LST', 'Source_Name', 'RA', 'DEC', 'Obs_Type', 'Integration_Time'])
@@ -519,8 +529,10 @@ def main(config, output_file):
     targets_only = final_schedule[final_schedule['Obs_Type'] == 'Target']
     print('Total number of targets observed this session: ', len(targets_only))
     print('Efficiency of this observing session: ', round(len(targets_only)*target_exposure_time * 100/(session_length * 3600), 2), '%')
+    targets_observed = pd.DataFrame(targets_observed, columns=['Pointing', 'RA', 'DEC', 'Obs_time_UTC', 'Obs_Time_LST'])
     
-
+    targets_observed.to_csv(output_targets_observed, mode='a', header=not os.path.exists(output_targets_observed), index=False)
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Schedule observations for the MeerKAT telescope')
