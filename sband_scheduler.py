@@ -558,7 +558,7 @@ def main(config, output_file):
     
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Schedule observations for the MeerKAT telescope')
+    parser = argparse.ArgumentParser(description='Schedule observations for the MMGPS S-BAND telescope')
     parser.add_argument('-c', '--config_file', help='Configuration file for the observation', default='sband_schedule.cfg')
     parser.add_argument('-o', '--output_file', help='Output file for the observation schedule', default='sband_schedule')
     args = parser.parse_args()
