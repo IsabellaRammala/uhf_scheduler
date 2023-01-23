@@ -228,7 +228,6 @@ def schedule_target(target_df, target_exposure_time, current_time_utc, current_t
         raise ValueError(f"Error: No target available at {current_time_utc} (UTC), {current_time_lst} (LST). \
             Change your observing start time or length of this session.")
 
-
     else:        
         # Select the first target since they are sorted by RA.
         target = targets_available.head(1)
@@ -271,63 +270,76 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
     # Be careful here. UTC times are given by user hence will have different dates. LST times will always have datetime.today() as the date
     current_time_utc = start_time_utc
     current_time_lst = start_time_lst
+    repeat_polarisation_calibrators = True
+    # Schedule the flux calibrators
+    #while current_time_utc < end_time_utc:
 
     # Schedule the flux calibrators
-    while current_time_utc < end_time_utc:
-
-        # Schedule the flux calibrators
-        current_time_utc, current_time_lst, schedule = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
-        current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
-        # Schedule the polarisation calibrators
-        current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
-        current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
-        
-        # Schedule the phase calibrators
-        current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule)
-        current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+    current_time_utc, current_time_lst, schedule = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+    current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+    # Schedule the polarisation calibrators
+    current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+    current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
     
+    # Schedule the phase calibrators
+    current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+    current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+
+
+    time_left_for_observation = end_time_utc - current_time_utc
     
-        time_left_for_observation = end_time_utc - current_time_utc
-        
-        '''
-        To figure out how many pairs of phase calibrators and targets can be observed, we need to 
-        know how much time is left for the observation and subtract the time for the flux calibrator,
-         polarisation calibrator. '''
-        
-        time_remaining_for_targets_phase_calibrators = time_left_for_observation - datetime.timedelta(seconds=pol_calib_exposure_time) - datetime.timedelta(seconds=flux_calib_exposure_time) - datetime.timedelta(seconds = 2 * slew_time)
-        one_group_target_phase_calib_slew_block = datetime.timedelta(seconds=target_exposure_time) * target_phase_calib_cycle_length  + datetime.timedelta(seconds=phase_calib_exposure_time) + datetime.timedelta(seconds = 2 * slew_time)
+    '''
+    To figure out how many pairs of phase calibrators and targets can be observed, we need to 
+    know how much time is left for the observation and subtract the time for the flux calibrator,
+        polarisation calibrator. '''
+    
+    time_remaining_for_targets_phase_calibrators = time_left_for_observation - datetime.timedelta(seconds=pol_calib_exposure_time) - datetime.timedelta(seconds=flux_calib_exposure_time) - datetime.timedelta(seconds = 2 * slew_time)
+    one_group_target_phase_calib_slew_block = datetime.timedelta(seconds = target_exposure_time) * target_phase_calib_cycle_length  + datetime.timedelta(seconds=phase_calib_exposure_time) + datetime.timedelta(seconds = 2 * slew_time)
+    number_of_pairs_target_phase_calib_slew_block = time_remaining_for_targets_phase_calibrators // one_group_target_phase_calib_slew_block
+    print(time_remaining_for_targets_phase_calibrators, one_group_target_phase_calib_slew_block, number_of_pairs_target_phase_calib_slew_block)
+    for i in range(number_of_pairs_target_phase_calib_slew_block):
+        if (pol_cal_lst_set_time - current_time_lst < datetime.timedelta(seconds= 6 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
+            
+            # Observe polarisation calibrators again at a different parallactic angle in its last 30-mins in the sky.
+            current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+            current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+            repeat_polarisation_calibrators = False
 
-        number_of_pairs_target_phase_calib_slew_block = time_remaining_for_targets_phase_calibrators // one_group_target_phase_calib_slew_block
-        repeat_polarisation_calibrators = True
-        for i in range(number_of_pairs_target_phase_calib_slew_block):
+        ''' Schedule targets based on PHASE_CALIBRATOR_CYCLE_LENGTH. If = 1, then we observe target 
+        and phase calibrator alternatively. If = 2, then we observe two targets followed by the 
+        phase calibrator. '''
 
-            if (pol_cal_lst_set_time - current_time_lst < datetime.timedelta(seconds= 6 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
-               
-                # Observe polarisation calibrators again at a different parallactic angle in its last 30-mins in the sky.
-                current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
-                current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
-                repeat_polarisation_calibrators = False
-
-            # Schedule the targets
+        for i in range(target_phase_calib_cycle_length):
+            # Schedule the targets. Slew between targets is assumed to be negligible.
             current_time_utc, current_time_lst, schedule, targets_observed = schedule_target(targets, target_exposure_time, current_time_utc, current_time_lst, schedule, targets_observed)
-            current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
-        
-            # Schedule the nearest phase calibrators
-            current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule, nearest=True, nearest_target = targets_observed[-1])
-            current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
 
-        #current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
-        current_time_utc, current_time_lst, schedule = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
-        
-        if current_time_utc > end_time_utc:
-            break
+        current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+    
+        # Schedule the nearest phase calibrators
+        current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule, nearest=True, nearest_target = targets_observed[-1])
+        current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+    #current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+    # If less than 6 minutes left, then observe the flux calibrator again.
+    #elif (remaining_time < datetime.timedelta(seconds= 1.2 * flux_calib_exposure_time)):
+
+    while current_time_utc < end_time_utc:
         remaining_time = end_time_utc - current_time_utc
-        # If there is enough time left, schedule the phase calibrator again
-        if remaining_time > datetime.timedelta(seconds=phase_calib_exposure_time):
-            current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule)
-        else:
-            break
+        # In case the polarisation calibrator has not been scheduled.
+        if repeat_polarisation_calibrators == True:
+            current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+            current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+            repeat_polarisation_calibrators = False
+        # If there is enough time left, schedule the target/phase calibrator again
+        if remaining_time > datetime.timedelta(seconds=target_exposure_time + flux_calib_exposure_time):
+            current_time_utc, current_time_lst, schedule, targets_observed = schedule_target(targets, target_exposure_time, current_time_utc, current_time_lst, schedule, targets_observed)
         
+        if remaining_time > datetime.timedelta(seconds=phase_calib_exposure_time + flux_calib_exposure_time):
+            current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+        
+        current_time_utc, current_time_lst, schedule = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+
+        
+
     return schedule, targets_observed
 
 def convert_meerkat_lst_to_utc(lst, date, meerkat):
