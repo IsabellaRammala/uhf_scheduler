@@ -323,6 +323,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
     #elif (remaining_time < datetime.timedelta(seconds= 1.2 * flux_calib_exposure_time)):
 
     while current_time_utc < end_time_utc:
+        
         remaining_time = end_time_utc - current_time_utc
         # In case the polarisation calibrator has not been scheduled.
         if repeat_polarisation_calibrators == True:
@@ -332,8 +333,8 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         # If there is enough time left, schedule the target/phase calibrator again
         if remaining_time > datetime.timedelta(seconds=target_exposure_time + flux_calib_exposure_time):
             current_time_utc, current_time_lst, schedule, targets_observed = schedule_target(targets, target_exposure_time, current_time_utc, current_time_lst, schedule, targets_observed)
-        
-        if remaining_time > datetime.timedelta(seconds=phase_calib_exposure_time + flux_calib_exposure_time):
+        remaining_time = end_time_utc - current_time_utc
+        if remaining_time > datetime.timedelta(seconds=phase_calib_exposure_time + flux_calib_exposure_time + slew_time):
             current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule)
         
         current_time_utc, current_time_lst, schedule = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
