@@ -260,7 +260,7 @@ def schedule_slews(current_time_utc, current_time_lst, slew_time, schedule):
     return current_time_utc, current_time_lst, schedule
 
 def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, flux_cals, pol_cals, \
-    targets, phase_cals, flux_calib_exposure_time, pol_calib_exposure_time, target_exposure_time, phase_calib_exposure_time, slew_time):
+    targets, phase_cals, flux_calib_exposure_time, pol_calib_exposure_time, target_exposure_time, phase_calib_exposure_time, slew_time, target_phase_calib_cycle_length):
 
     """
     Run the scheduler
@@ -285,20 +285,25 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         # Schedule the phase calibrators
         current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule)
         current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
-       
+    
+    
         time_left_for_observation = end_time_utc - current_time_utc
-
-        # To figure out how many pairs of phase calibrators and targets can be observed, we need to know how much time is left for the observation
+        
+        '''
+        To figure out how many pairs of phase calibrators and targets can be observed, we need to 
+        know how much time is left for the observation and subtract the time for the flux calibrator,
+         polarisation calibrator. '''
+        
         time_remaining_for_targets_phase_calibrators = time_left_for_observation - datetime.timedelta(seconds=pol_calib_exposure_time) - datetime.timedelta(seconds=flux_calib_exposure_time) - datetime.timedelta(seconds = 2 * slew_time)
-        one_pair_target_phase_calib_slew_block = datetime.timedelta(seconds=target_exposure_time) + datetime.timedelta(seconds=phase_calib_exposure_time) + datetime.timedelta(seconds = 2 * slew_time)
+        one_group_target_phase_calib_slew_block = datetime.timedelta(seconds=target_exposure_time) * target_phase_calib_cycle_length  + datetime.timedelta(seconds=phase_calib_exposure_time) + datetime.timedelta(seconds = 2 * slew_time)
 
-        number_of_pairs_target_phase_calib_slew_block = time_remaining_for_targets_phase_calibrators // one_pair_target_phase_calib_slew_block
+        number_of_pairs_target_phase_calib_slew_block = time_remaining_for_targets_phase_calibrators // one_group_target_phase_calib_slew_block
         repeat_polarisation_calibrators = True
         for i in range(number_of_pairs_target_phase_calib_slew_block):
 
-            if (pol_cal_lst_set_time - current_time_lst < datetime.timedelta(seconds= 12 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
+            if (pol_cal_lst_set_time - current_time_lst < datetime.timedelta(seconds= 6 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
                
-                # Observe polarisation calibrators again at a different parallactic angle in its last hour in the sky.
+                # Observe polarisation calibrators again at a different parallactic angle in its last 30-mins in the sky.
                 current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
                 current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
                 repeat_polarisation_calibrators = False
@@ -311,12 +316,18 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
             current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule, nearest=True, nearest_target = targets_observed[-1])
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
 
-        current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
+        #current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
         current_time_utc, current_time_lst, schedule = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
-
+        
         if current_time_utc > end_time_utc:
             break
-    
+        remaining_time = end_time_utc - current_time_utc
+        # If there is enough time left, schedule the phase calibrator again
+        if remaining_time > datetime.timedelta(seconds=phase_calib_exposure_time):
+            current_time_utc, current_time_lst, schedule = schedule_phase_cal(phase_cals, phase_calib_exposure_time, current_time_utc, current_time_lst, schedule)
+        else:
+            break
+        
     return schedule, targets_observed
 
 def convert_meerkat_lst_to_utc(lst, date, meerkat):
@@ -438,7 +449,7 @@ def main(config, output_file):
     flux_cals = pd.read_csv('rise_set_time_flux_cal.csv')
     pol_cals = pd.read_csv('rise_set_time_pol_cal.csv')
     output_targets_observed ='targets_already_scheduled.csv'
-    targets_already_scheduled = []
+    targets_already_scheduled_list = []
     if os.path.isfile(output_targets_observed):
         targets_already_scheduled = pd.read_csv(output_targets_observed)
         targets_already_scheduled_list = targets_already_scheduled['Pointing'].to_list()
@@ -472,7 +483,7 @@ def main(config, output_file):
     requested_lst_time = literal_eval(config['OBSERVATION_PLAN']['LST_START'])
     obs_date = literal_eval(config['OBSERVATION_PLAN']['OBSERVATION_DATE'])
     start_time_utc = convert_meerkat_lst_to_utc(requested_lst_time, obs_date, meerkat)
-
+    target_phase_calib_cycle_length = literal_eval(config['OBSERVATION_PLAN']['PHASE_CALIBRATOR_CYCLE_LENGTH'])
     # Old method of directly giving utc time
     #start_time_utc = '2023-02-01 19:00:00'  
     #start_time_utc = datetime.datetime.strptime(start_time_utc, '%Y-%m-%d %H:%M:%S')
@@ -517,7 +528,7 @@ def main(config, output_file):
     phase_cals = phase_cals.sort_values(by=['RA'])
 
     schedule, targets_observed = run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, flux_cals, pol_cals, \
-        targets, phase_cals, flux_calib_exposure_time, pol_calib_exposure_time, target_exposure_time, phase_calib_exposure_time, slew_time)
+        targets, phase_cals, flux_calib_exposure_time, pol_calib_exposure_time, target_exposure_time, phase_calib_exposure_time, slew_time, target_phase_calib_cycle_length)
 
     final_schedule = pd.DataFrame(schedule, columns=['Start Time UTC', 'Start Time LST', 'Source_Name', 'RA', 'DEC', 'Obs_Type', 'Integration_Time'])
     print_slews = False
