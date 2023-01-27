@@ -12,7 +12,7 @@ This is a simple scheduler software for the MPIfR MeerKAT S-BAND Survey.
 
 1. Edit the config file 'sband_schedule.cfg'.
 2. Update the LST time and UTC date when you want to start observing plus the total session length in hours.
-3. Then run the code sband_scheduler.py.
+3. Then run the code sband_scheduler_version2.py.
 
 Dependencies:
 Pandas, astropy, pytz, numpy
