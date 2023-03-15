@@ -11,7 +11,7 @@ from astropy.time import Time
 import warnings
 import configparser, argparse
 from ast import literal_eval
-
+import json
 
 
 
@@ -389,7 +389,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         if remaining_pol_cal_time > datetime.timedelta(days = 1):
             remaining_pol_cal_time = remaining_pol_cal_time - datetime.timedelta(days = int(remaining_pol_cal_time.days))
 
-        if (remaining_pol_cal_time < datetime.timedelta(seconds= 12 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
+        if (remaining_pol_cal_time < datetime.timedelta(seconds= 6 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
         
             current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
@@ -400,8 +400,8 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         if remaining_flux_cal_time > datetime.timedelta(days = 1):
             remaining_flux_cal_time = remaining_flux_cal_time - datetime.timedelta(days = int(remaining_flux_cal_time.days))
                 
-        # Schedule the flux calibrators if they are in the last 60-mins on the sky
-        if (remaining_flux_cal_time < datetime.timedelta(seconds= 12 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
+        # Schedule the flux calibrators if they are in the last 30-mins on the sky
+        if (remaining_flux_cal_time < datetime.timedelta(seconds= 6 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
             current_time_utc, current_time_lst, schedule, flux_cal_lst_set_time = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
             repeat_flux_calibrators = False                                              
@@ -421,7 +421,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         if remaining_pol_cal_time > datetime.timedelta(days = 1):
             remaining_pol_cal_time = remaining_pol_cal_time - datetime.timedelta(days = int(remaining_pol_cal_time.days))
 
-        if (remaining_pol_cal_time < datetime.timedelta(seconds= 12 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
+        if (remaining_pol_cal_time < datetime.timedelta(seconds= 6 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
         
             current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
@@ -432,7 +432,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
 
         if remaining_flux_cal_time > datetime.timedelta(days = 1):
             remaining_flux_cal_time = remaining_flux_cal_time - datetime.timedelta(days = int(remaining_flux_cal_time.days))
-        if (remaining_flux_cal_time < datetime.timedelta(seconds= 12 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
+        if (remaining_flux_cal_time < datetime.timedelta(seconds= 6 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
             current_time_utc, current_time_lst, schedule, flux_cal_lst_set_time = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
             repeat_flux_calibrators = False            
@@ -455,7 +455,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         repeat_flux_calibrators = False            
 
 
-    return schedule, targets_observed
+    return schedule, targets_observed, current_time_utc
 
 def convert_meerkat_lst_to_utc(lst, date, meerkat):
 
@@ -533,6 +533,21 @@ def convert_meerkat_lst_to_utc(lst, date, meerkat):
             print('With a requested LST time of ', lst, ' and  UTC start date of ', utc_start.date(), 'the UTC observation start time is ', utc_start.time())
             return utc_start
                     
+
+def generate_block(name, ra, dec, tags, ttype, duration):
+    """
+    Generate a python dict corresponding to an observing block 
+    """
+    target = {}
+    target['name']     = name
+    target['ra']       = ra.lstrip(' ').rstrip(' ')
+    target['dec']      = dec.lstrip(' ').rstrip(' ')
+    target['tags']     = tags
+    target['type']     = ttype
+    target['duration'] = duration
+    #
+    return(target)
+
 
     
 
@@ -654,9 +669,9 @@ def main(config, output_file):
     # Sort phase calibrators by Right Ascension
     phase_cals = phase_cals.sort_values(by=['RA'])
 
-    schedule, targets_observed = run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, flux_cals, pol_cals, \
+    schedule, targets_observed, session_end_time = run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, flux_cals, pol_cals, \
         targets, phase_cals, flux_calib_exposure_time, pol_calib_exposure_time, target_exposure_time, phase_calib_exposure_time, slew_time, target_phase_calib_cycle_length)
-
+    
     final_schedule = pd.DataFrame(schedule, columns=['Start Time UTC', 'Start Time LST', 'Source_Name', 'RA', 'DEC', 'Obs_Type', 'Integration_Time'])
     print_slews = False
     if print_slews:
@@ -666,12 +681,57 @@ def main(config, output_file):
         final_schedule.to_csv(output_file + '.csv', index=False)
     targets_only = final_schedule[final_schedule['Obs_Type'] == 'Target']
     print('Total number of targets observed this session: ', len(targets_only))
-    print('Efficiency of this observing session: ', round(len(targets_only)*target_exposure_time * 100/(session_length * 3600), 2), '%')
+    actual_session_length = (session_end_time - start_time_utc).total_seconds()/3600
+    print('Actual session length: ', round(actual_session_length, 2), ' hours')
+    print('Efficiency of this observing session: ', round(len(targets_only)*target_exposure_time * 100/(actual_session_length * 3600), 2), '%')
     targets_observed = pd.DataFrame(targets_observed, columns=['Pointing', 'RA', 'DEC', 'Obs_time_UTC', 'Obs_Time_LST'])
     
     targets_observed.to_csv(output_targets_observed, mode='a', header=not os.path.exists(output_targets_observed), index=False)
     print(final_schedule)
+    #print(targets_observed)
+    full_obs_schedule = []
+    for index, row in final_schedule.iterrows():
+        if row['Obs_Type'] == 'Flux_Cal':
+            tags = ['delaycal', 'fluxcal', 'bpcal']
+        elif row['Obs_Type'] == 'Pol_Cal':
+            tags = ['polcal']
+        elif row['Obs_Type'] == 'Phase_Cal':
+            tags = ['gaincal']
+        else:
+            tags = ['target']
+        
+        single_block = generate_block(row['Source_Name'], row['RA'], row['DEC'], \
+                                      tags, 'track', row['Integration_Time'])
+        full_obs_schedule.append(single_block)
+    
+    # Create the JSON file
+    with open('SCI-20200703-MK-02.json', 'r') as json_handle:
+        template = json.load(json_handle)
+    
+    template['activities'] = []
+    template['owner'] = 'Vishnu Balakrishnan'
+    template['owner_email'] = 'vishnubk93@gmail.com'
+    template['id'] = 0
+    id_text = datetime.datetime.today().strftime('%Y%m%d') + '_2'
 
+    template['description'] = 'MPIfR Galactic Plane Survey S-band: Setup {}'.format(id_text)
+    template['proposal_id'] = 'SCI-20200703-MK-03'
+    template['blocks'][0]['name'] = 'Setup {}'.format(id_text)
+    template['blocks'][0]['targets'] = full_obs_schedule
+    template['instrument']['integration_time']  = '8.0'
+    template['instrument']['product']  = 'c875M4k'
+    template['instrument']['center_freq']  = '2406.25'
+
+
+    template['instrument']['pool_resources']    = ['apsuse', 'cbf', 'fbfuse', 'sdp', 'tuse']
+    template['instrument']['config_auth_host'] = 'TRAPUM'
+    template['horizon'] = 20.
+   
+    template['lst_start'] = start_time_lst.time().strftime('%H:%M')
+    template['lst_start_end'] = end_time_lst.time().strftime('%H:%M')
+    template['desired_start_time'] = str(start_time_utc)
+    with open('SCI-20200703-MK-03_%s.json'%id_text, 'w') as json_handle:
+        json.dump(template, json_handle, indent=4, sort_keys=False)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Schedule observations for the MMGPS S-BAND survey')
     parser.add_argument('-c', '--config_file', help='Configuration file for the observation', default='sband_schedule.cfg')

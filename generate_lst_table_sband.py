@@ -191,14 +191,14 @@ for i in range(len(phase_cal_list)):
         #set_time_sidereal = np.ma.masked
         rise_time_sidereal = '0:00:00.0000000'
         set_time_sidereal = '23:59:59.99999999'
-        rise_set_time_df_phase_cal.append([phase_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'Phase_Cal'])
+        rise_set_time_df_phase_cal.append([phase_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'gaincal'])
 
     else:
         rise_time_utc += rise_set_error_margin
         set_time_utc -= rise_set_error_margin
         rise_time_sidereal = meerkat.local_sidereal_time(rise_time_utc).to_string(sep=':') 
         set_time_sidereal = meerkat.local_sidereal_time(set_time_utc).to_string(sep=':')
-        rise_set_time_df_phase_cal.append([phase_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'Phase_Cal'])
+        rise_set_time_df_phase_cal.append([phase_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'gaincal'])
 
 rise_set_time_phase_cal = pd.DataFrame(rise_set_time_df_phase_cal, columns=['Pointing', 'RA', 'DEC', 'Rise_time_sidereal_20_deg', 'Set_time_sidereal_20_deg', 'Obs_type'])
 rise_set_time_phase_cal['Priority'] = 1
@@ -216,7 +216,7 @@ for i in range(len(flux_cal_list)):
     if rise_time_utc.mask: 
         rise_time_sidereal =  np.ma.masked
         set_time_sidereal = np.ma.masked
-        rise_set_time_df_flux_cal.append([flux_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'Flux_Cal'])
+        rise_set_time_df_flux_cal.append([flux_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'fluxcal'])
 
 
     else:
@@ -224,7 +224,7 @@ for i in range(len(flux_cal_list)):
         set_time_utc -= rise_set_error_margin
         rise_time_sidereal = meerkat.local_sidereal_time(rise_time_utc).to_string(sep=':') 
         set_time_sidereal = meerkat.local_sidereal_time(set_time_utc).to_string(sep=':')
-        rise_set_time_df_flux_cal.append([flux_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'Flux_Cal'])
+        rise_set_time_df_flux_cal.append([flux_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'fluxcal'])
 
 rise_set_time_flux_cal = pd.DataFrame(rise_set_time_df_flux_cal, columns=['Pointing', 'RA', 'DEC', 'Rise_time_sidereal_20_deg', 'Set_time_sidereal_20_deg', 'Obs_type'])
 rise_set_time_flux_cal['Priority'] = 1
@@ -242,14 +242,14 @@ for i in range(len(pol_cal_list)):
     if rise_time_utc.mask: 
         rise_time_sidereal =  np.ma.masked
         set_time_sidereal = np.ma.masked
-        rise_set_time_df_pol_cal.append([pol_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'Pol_Cal'])
+        rise_set_time_df_pol_cal.append([pol_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'polcal'])
 
     else:
         rise_time_utc += rise_set_error_margin
         set_time_utc -= rise_set_error_margin
         rise_time_sidereal = meerkat.local_sidereal_time(rise_time_utc).to_string(sep=':') 
         set_time_sidereal = meerkat.local_sidereal_time(set_time_utc).to_string(sep=':')
-        rise_set_time_df_pol_cal.append([pol_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'Pol_Cal'])       
+        rise_set_time_df_pol_cal.append([pol_cal_list[i].name, ra, dec, rise_time_sidereal, set_time_sidereal, 'polcal'])       
 
 rise_set_time_pol_cal = pd.DataFrame(rise_set_time_df_pol_cal, columns=['Pointing', 'RA', 'DEC', 'Rise_time_sidereal_20_deg', 'Set_time_sidereal_20_deg', 'Obs_type'])
 rise_set_time_pol_cal['Priority'] = 1
