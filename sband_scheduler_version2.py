@@ -712,7 +712,7 @@ def main(config, output_file):
     template['owner'] = 'Vishnu Balakrishnan'
     template['owner_email'] = 'vishnubk93@gmail.com'
     template['id'] = 0
-    id_text = datetime.datetime.today().strftime('%Y%m%d') + '_2'
+    id_text = datetime.datetime.today().strftime('%Y%m%d') + '_3'
 
     template['description'] = 'MPIfR Galactic Plane Survey S-band: Setup {}'.format(id_text)
     template['proposal_id'] = 'SCI-20200703-MK-03'
