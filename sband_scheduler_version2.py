@@ -373,7 +373,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
 
         ''' Depending on the start time of the observation, the polarisation calibrators may set during 
         our target phase calib block or later. If its set during the target phase calib block, we observe   
-        it again at a different parallactic angle in its last 30-mins in the sky.
+        it again at a different parallactic angle in its last 60-mins in the sky.
         '''
         
         if i == 0: # No previous phase cal for first block
@@ -383,13 +383,13 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         else:
             current_time_utc, current_time_lst, schedule, targets_observed, last_phase_cal, last_phase_cal_ra, last_phase_cal_dec = schedule_block_phase_calibrator_and_target(phase_cals, targets, phase_calib_exposure_time, target_exposure_time, slew_time, current_time_utc, current_time_lst, schedule, targets_observed, target_phase_calib_cycle_length, one_group_target_phase_calib_slew_block.total_seconds(), last_phase_cal = last_phase_cal)
 
-        # Schedule the polarisation calibrators if they are in the last 30-mins on the sky
+        # Schedule the polarisation calibrators if they are in the last 60-mins on the sky
         remaining_pol_cal_time = pol_cal_lst_set_time - current_time_lst
         # taking care of the date wrapping problem
         if remaining_pol_cal_time > datetime.timedelta(days = 1):
             remaining_pol_cal_time = remaining_pol_cal_time - datetime.timedelta(days = int(remaining_pol_cal_time.days))
 
-        if (remaining_pol_cal_time < datetime.timedelta(seconds= 6 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
+        if (remaining_pol_cal_time < datetime.timedelta(seconds= 12 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
         
             current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
@@ -400,8 +400,8 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         if remaining_flux_cal_time > datetime.timedelta(days = 1):
             remaining_flux_cal_time = remaining_flux_cal_time - datetime.timedelta(days = int(remaining_flux_cal_time.days))
                 
-        # Schedule the flux calibrators if they are in the last 30-mins on the sky
-        if (remaining_flux_cal_time < datetime.timedelta(seconds= 6 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
+        # Schedule the flux calibrators if they are in the last 60-mins on the sky
+        if (remaining_flux_cal_time < datetime.timedelta(seconds= 12 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
             current_time_utc, current_time_lst, schedule, flux_cal_lst_set_time = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
             repeat_flux_calibrators = False                                              
@@ -421,7 +421,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
         if remaining_pol_cal_time > datetime.timedelta(days = 1):
             remaining_pol_cal_time = remaining_pol_cal_time - datetime.timedelta(days = int(remaining_pol_cal_time.days))
 
-        if (remaining_pol_cal_time < datetime.timedelta(seconds= 6 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
+        if (remaining_pol_cal_time < datetime.timedelta(seconds= 12 * pol_calib_exposure_time) and repeat_polarisation_calibrators == True):
         
             current_time_utc, current_time_lst, schedule, pol_cal_lst_set_time = schedule_pol_cal(pol_cals, pol_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
@@ -432,7 +432,7 @@ def run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, fl
 
         if remaining_flux_cal_time > datetime.timedelta(days = 1):
             remaining_flux_cal_time = remaining_flux_cal_time - datetime.timedelta(days = int(remaining_flux_cal_time.days))
-        if (remaining_flux_cal_time < datetime.timedelta(seconds= 6 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
+        if (remaining_flux_cal_time < datetime.timedelta(seconds= 12 * flux_calib_exposure_time) and repeat_flux_calibrators == True):
             current_time_utc, current_time_lst, schedule, flux_cal_lst_set_time = schedule_flux_cal(flux_cals, flux_calib_exposure_time, current_time_utc, current_time_lst, schedule)
             current_time_utc, current_time_lst, schedule = schedule_slews(current_time_utc, current_time_lst, slew_time, schedule)
             repeat_flux_calibrators = False            
@@ -712,7 +712,7 @@ def main(config, output_file):
     template['owner'] = 'Vishnu Balakrishnan'
     template['owner_email'] = 'vishnubk93@gmail.com'
     template['id'] = 0
-    id_text = datetime.datetime.today().strftime('%Y%m%d') + '_3'
+    id_text = datetime.datetime.today().strftime('%Y%m%d') + '_5'
 
     template['description'] = 'MPIfR Galactic Plane Survey S-band: Setup {}'.format(id_text)
     template['proposal_id'] = 'SCI-20200703-MK-03'

@@ -28,8 +28,8 @@
         "cycle_len": null
     },
     "horizon": 20,
-    "lst_start": "07:30",
-    "lst_start_end": "20:45",
+    "lst_start": "04:35",
+    "lst_start_end": "05:00",
     "desired_start_time": "2020-08-02 09:35:00.000Z",
     "duration": "",
     "blocks": [
