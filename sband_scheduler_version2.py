@@ -762,7 +762,6 @@ def main(config, output_file):
     with open('SCI-20200703-MK-03_%s.json' % id_text, 'w') as json_handle:
         json.dump(template, json_handle, indent=4, sort_keys=False)
 
-# Rest of the code, including main function and argparse block, remains the same
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Schedule observations for the MMGPS S-BAND survey')
