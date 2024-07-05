@@ -686,9 +686,8 @@ def main(config, output_file):
     print('Efficiency of this observing session: ', round(len(targets_only)*target_exposure_time * 100/(actual_session_length * 3600), 2), '%')
     targets_observed = pd.DataFrame(targets_observed, columns=['Pointing', 'RA', 'DEC', 'Obs_time_UTC', 'Obs_Time_LST'])
     
-    targets_observed.to_csv(output_targets_observed, mode='a', header=not os.path.exists(output_targets_observed), index=False)
-    print(final_schedule)
-    #print(targets_observed)
+    
+    target_scheduled_json = []
     full_obs_schedule = []
     for index, row in final_schedule.iterrows():
         if row['Obs_Type'] == 'Flux_Cal':
@@ -700,38 +699,71 @@ def main(config, output_file):
         else:
             tags = ['target']
         
+
         single_block = generate_block(row['Source_Name'], row['RA'], row['DEC'], \
                                       tags, 'track', row['Integration_Time'])
         full_obs_schedule.append(single_block)
+        if row['Source_Name'].startswith('MSGPS_S'):
+            target_scheduled_json.append(single_block)
     
+    target_scheduled_json = pd.DataFrame(target_scheduled_json)
+    
+
+    #write to csv file for target_scheduled_json if exists, append
+    if not os.path.exists('targets_in_json.csv'):
+        target_scheduled_json.to_csv('targets_in_json.csv', index=False)
+    else:
+        target_scheduled_json.to_csv('targets_in_json.csv', mode='a', header=False, index=False)
+    
+   
+    #Duplicate Checker
+    duplicates = target_scheduled_json[target_scheduled_json['name'].duplicated()]
+   
+    if not duplicates.empty:
+        print('Duplicate Targets in the JSON file!! Exiting...')
+        print(duplicates)
+        sys.exit(1)
+
+    else:
+        print('No duplicates found in the JSON file. All good!')
+    
+
+    targets_observed.to_csv(output_targets_observed, mode='a', header=not os.path.exists(output_targets_observed), index=False)
+    
+    print(final_schedule)
     # Create the JSON file
     with open('SCI-20200703-MK-02.json', 'r') as json_handle:
         template = json.load(json_handle)
-    
+
     template['activities'] = []
     template['owner'] = 'Vishnu Balakrishnan'
     template['owner_email'] = 'vishnubk93@gmail.com'
     template['id'] = 0
-    id_text = datetime.datetime.today().strftime('%Y%m%d') + '_5'
+    counter = 1
+    prefix = datetime.datetime.today().strftime('%Y%m%d') + '_'
+    while os.path.exists('SCI-20200703-MK-03_' + prefix + str(counter) + '.json'):
+        counter += 1
+    id_text = prefix + str(counter)
 
+    # The rest of the code remains the same, but we will use the incremented counter in id_text
     template['description'] = 'MPIfR Galactic Plane Survey S-band: Setup {}'.format(id_text)
     template['proposal_id'] = 'SCI-20200703-MK-03'
     template['blocks'][0]['name'] = 'Setup {}'.format(id_text)
     template['blocks'][0]['targets'] = full_obs_schedule
-    template['instrument']['integration_time']  = '8.0'
-    template['instrument']['product']  = 'c875M4k'
-    template['instrument']['center_freq']  = '2406.25'
-
-
-    template['instrument']['pool_resources']    = ['apsuse', 'cbf', 'fbfuse', 'sdp', 'tuse']
+    template['instrument']['integration_time'] = '8.0'
+    template['instrument']['product'] = 'c875M4k'
+    template['instrument']['center_freq'] = '2406.25'
+    template['instrument']['pool_resources'] = ['apsuse', 'cbf', 'fbfuse', 'sdp', 'tuse']
     template['instrument']['config_auth_host'] = 'TRAPUM'
     template['horizon'] = 20.
-   
     template['lst_start'] = start_time_lst.time().strftime('%H:%M')
     template['lst_start_end'] = end_time_lst.time().strftime('%H:%M')
     template['desired_start_time'] = str(start_time_utc)
-    with open('SCI-20200703-MK-03_%s.json'%id_text, 'w') as json_handle:
+    with open('SCI-20200703-MK-03_%s.json' % id_text, 'w') as json_handle:
         json.dump(template, json_handle, indent=4, sort_keys=False)
+
+# Rest of the code, including main function and argparse block, remains the same
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Schedule observations for the MMGPS S-BAND survey')
     parser.add_argument('-c', '--config_file', help='Configuration file for the observation', default='sband_schedule.cfg')
