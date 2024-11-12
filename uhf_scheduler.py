@@ -185,8 +185,8 @@ def schedule_phase_cal_schedule_block_start(phase_cal_df, phase_calib_exposure_t
         return current_time_utc, current_time_lst, schedule, phase_cal['Pointing'].iloc[0], phase_cal['RA'].iloc[0], phase_cal['DEC'].iloc[0]
 
     # If no phase calibrator has target hits, then schedule J1619-8418 because it's always visible.
-    elif phase_cal_max_hits_selected == '':
-        phase_cal_max_hits_selected = 'J1619-8418'
+    # elif phase_cal_max_hits_selected == '':
+    #     phase_cal_max_hits_selected = 'J1619-8418'
 
     phase_cal = phase_cals_available[phase_cals_available['Pointing'] == phase_cal_max_hits_selected]
     # Add the phase calibrator to the schedule
@@ -227,7 +227,7 @@ def get_available_target_now(target_df, target_exposure_time, current_time_utc, 
     target_df['Set_time_sidereal_20_deg_minus_target_scan'] = target_df['Set_time_sidereal_20_deg'] - datetime.timedelta(seconds=target_exposure_time)
 
 
-    #source rising from 20-50 degrees or setting down from 50-20 degrees.
+    # Source rising from 20-50 degrees or setting down from 50-20 degrees.
     # Targets should be in the 20-50 degree range. If not, skip them.    
     targets_available = target_df.loc[(((target_df['Rise_time_sidereal_20_deg'] < current_time_lst) \
         & (target_df['Rise_time_sidereal_50_deg_minus_target_scan'] > current_time_lst)) | \
@@ -572,8 +572,8 @@ def main(config, output_file):
         "elevation_unit": "meter",
         "longitude": 21.443888889697842,
         "source": "MEERKAT, used in timing mode.\n\n    The origin of this data is unknown but as of 2021 June 8 it agrees exactly with\n    the values used by TEMPO and TEMPO2.\nvia PINT",
-	"timezone": "Africa/Johannesburg",
-	"aliases": ["MeerKAT"]}
+	    "timezone": "Africa/Johannesburg",
+	    "aliases": ["MeerKAT"]}
 
     # MeerKAT Location
     location = EarthLocation.from_geodetic(mkt_location['longitude'] * u.deg, \
@@ -669,6 +669,7 @@ def main(config, output_file):
     # Sort phase calibrators by Right Ascension
     phase_cals = phase_cals.sort_values(by=['RA'])
 
+
     schedule, targets_observed, session_end_time = run_scheduler(start_time_utc, start_time_lst, end_time_utc, end_time_lst, flux_cals, pol_cals, \
         targets, phase_cals, flux_calib_exposure_time, pol_calib_exposure_time, target_exposure_time, phase_calib_exposure_time, slew_time, target_phase_calib_cycle_length)
     
@@ -690,20 +691,20 @@ def main(config, output_file):
     target_scheduled_json = []
     full_obs_schedule = []
     for index, row in final_schedule.iterrows():
-        if row['Obs_Type'] == 'Flux_Cal':
+        print (index, row)
+        if row['Obs_Type'] == 'fluxcal':
             tags = ['delaycal', 'fluxcal', 'bpcal']
-        elif row['Obs_Type'] == 'Pol_Cal':
+        elif row['Obs_Type'] == 'polcal':
             tags = ['polcal']
-        elif row['Obs_Type'] == 'Phase_Cal':
-            tags = ['gaincal']
+        elif row['Obs_Type'] == 'gaincal':
+            tags = ['polcal']
         else:
             tags = ['target']
-        
 
         single_block = generate_block(row['Source_Name'], row['RA'], row['DEC'], \
                                       tags, 'track', row['Integration_Time'])
         full_obs_schedule.append(single_block)
-        if row['Source_Name'].startswith('MSGPS_S'):
+        if row['Source_Name'].startswith('MSGPS_U'):
             target_scheduled_json.append(single_block)
     
     target_scheduled_json = pd.DataFrame(target_scheduled_json)
@@ -715,58 +716,58 @@ def main(config, output_file):
     else:
         target_scheduled_json.to_csv('targets_in_json.csv', mode='a', header=False, index=False)
     
-   
-    #Duplicate Checker
-    duplicates = target_scheduled_json[target_scheduled_json['name'].duplicated()]
-   
-    if not duplicates.empty:
-        print('Duplicate Targets in the JSON file!! Exiting...')
-        print(duplicates)
-        sys.exit(1)
 
-    else:
-        print('No duplicates found in the JSON file. All good!')
+    #Duplicate Checker
+    # duplicates = target_scheduled_json[target_scheduled_json['name'].duplicated()]
+   
+    # if not duplicates.empty:
+    #     print('Duplicate Targets in the JSON file!! Exiting...')
+    #     print(duplicates)
+    #     sys.exit(1)
+
+    # else:
+    #     print('No duplicates found in the JSON file. All good!')
     
 
     targets_observed.to_csv(output_targets_observed, mode='a', header=not os.path.exists(output_targets_observed), index=False)
     
     print(final_schedule)
     # Create the JSON file
-    with open('SCI-20200703-MK-02.json', 'r') as json_handle:
+    with open('SCI-20200703-MK-06.json', 'r') as json_handle:
         template = json.load(json_handle)
 
     template['activities'] = []
-    template['owner'] = 'Vishnu Balakrishnan'
-    template['owner_email'] = 'vishnubk93@gmail.com'
+    template['owner'] = 'Isabella Rammala'
+    template['owner_email'] = 'irammala@mpifr-bonn.mpg.de'
     template['id'] = 0
     counter = 1
     prefix = datetime.datetime.today().strftime('%Y%m%d') + '_'
-    while os.path.exists('SCI-20200703-MK-03_' + prefix + str(counter) + '.json'):
+    while os.path.exists('SCI-20200703-MK-06_' + prefix + str(counter) + '.json'):
         counter += 1
     id_text = prefix + str(counter)
 
     # The rest of the code remains the same, but we will use the incremented counter in id_text
-    template['description'] = 'MPIfR Galactic Plane Survey S-band: Setup {}'.format(id_text)
-    template['proposal_id'] = 'SCI-20200703-MK-03'
+    template['description'] = 'MPIfR Galactic Plane Survey UHF: Setup {}'.format(id_text)
+    template['proposal_id'] = 'SCI-20200703-MK-06'
     template['blocks'][0]['name'] = 'Setup {}'.format(id_text)
     template['blocks'][0]['targets'] = full_obs_schedule
     template['instrument']['integration_time'] = '8.0'
-    template['instrument']['product'] = 'c875M4k'
-    template['instrument']['center_freq'] = '2406.25'
+    template['instrument']['product'] = 'c544M4k'
+    template['instrument']['center_freq'] = '815.50'
     template['instrument']['pool_resources'] = ['apsuse', 'cbf', 'fbfuse', 'sdp', 'tuse']
     template['instrument']['config_auth_host'] = 'TRAPUM'
-    template['horizon'] = 20.
+    template['horizon'] = 15.
     template['lst_start'] = start_time_lst.time().strftime('%H:%M')
     template['lst_start_end'] = end_time_lst.time().strftime('%H:%M')
     template['desired_start_time'] = str(start_time_utc)
-    with open('SCI-20200703-MK-03_%s.json' % id_text, 'w') as json_handle:
+    with open('SCI-20200703-MK-06_%s.json' % id_text, 'w') as json_handle:
         json.dump(template, json_handle, indent=4, sort_keys=False)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Schedule observations for the MMGPS S-BAND survey')
-    parser.add_argument('-c', '--config_file', help='Configuration file for the observation', default='sband_schedule.cfg')
-    parser.add_argument('-o', '--output_file', help='Output file for the observation schedule', default='sband_schedule')
+    parser = argparse.ArgumentParser(description='Schedule observations for the MMGPS UHF survey')
+    parser.add_argument('-c', '--config_file', help='Configuration file for the observation', default='uhf_schedule.cfg')
+    parser.add_argument('-o', '--output_file', help='Output file for the observation schedule', default='uhf_schedule')
     args = parser.parse_args()
     config_file = args.config_file
     output_file = args.output_file

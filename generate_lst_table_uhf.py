@@ -24,34 +24,24 @@ mkt_location = {
         "elevation_unit": "meter",
         "longitude": 21.443888889697842,
         "source": "MEERKAT, used in timing mode.\n\n    The origin of this data is unknown but as of 2021 June 8 it agrees exactly with\n    the values used by TEMPO and TEMPO2.\nvia PINT",
-	"timezone": "Africa/Johannesburg",
-	"aliases": ["MeerKAT"]}
+	    "timezone": "Africa/Johannesburg",
+	    "aliases": ["MeerKAT"]}
 
-phase_cals = {'J0825-5010':SkyCoord('08:25:26.870000 -50:10:38.50000', 
+phase_cals = {"J1218-4600":SkyCoord("12:18:06 -46:00:29",
                                     unit=(u.hourangle, u.deg)),
-              'J0906-6829':SkyCoord('09:06:52.440000 -68:29:39.80000', 
+              "J1424-4913":SkyCoord("14:24:32 -49:13:50",
                                     unit=(u.hourangle, u.deg)),
-              'J1318-4620':SkyCoord('13:18:30.060000 -46:20:34.90000', 
+              "J1726-5529":SkyCoord("17:26:50 -55:29:40",
                                     unit=(u.hourangle, u.deg)),
-              'J1619-8418':SkyCoord('16:19:33.970000 -84:18:19.10000', 
+              "J1733-1304":SkyCoord("17:33:03 -13:04:50",
                                     unit=(u.hourangle, u.deg)),
-              'J1726-5529':SkyCoord('17:26:49.700000 -55:29:38.00000', 
-                                    unit=(u.hourangle, u.deg)), 
-              'J2232+1143':SkyCoord('22:32:36.410000 +11:43:50.90000', 
+              "J1744-5144":SkyCoord("17:44:25 -51:44:44",
                                     unit=(u.hourangle, u.deg)),
-              'J0828-3731':SkyCoord('08:28:05 -37:31:06',
+              "J1819-6345":SkyCoord("18:19:35 -63:45:48",
                                     unit=(u.hourangle, u.deg)),
-              'J1154-3505':SkyCoord('11:54:22 -35:05:29',
+              "J1830-3602":SkyCoord("18:30:59 -36:02:30",
                                     unit=(u.hourangle, u.deg)),
-              'J1323-4452':SkyCoord('13:23:04 -44:52:34',
-                                    unit=(u.hourangle, u.deg)),
-              'J1424-4913':SkyCoord('14:24:32 -49:13:50',
-                                    unit=(u.hourangle, u.deg)),
-              'J1733-1304':SkyCoord('17:33:03 -13:04:50',
-                                    unit=(u.hourangle, u.deg)),
-              'J1744-5144':SkyCoord('17:44:25 -51:44:44',
-                                    unit=(u.hourangle, u.deg)),
-              'J2158-1501':SkyCoord('22:32:36.410000 +11:43:50.90000',
+              "J1833-2103":SkyCoord("18:33:40 -21:03:40",
                                     unit=(u.hourangle, u.deg)),
               }
 
@@ -62,7 +52,7 @@ flux_cal = {'J1939-6342':SkyCoord('19:39:25.0264 -63:42:45.625',
 
 pol_cal = {'3C286':SkyCoord('13:31:08.2879 +30:30:32.958', 
                                     unit=(u.hourangle, u.deg)),
-        '3C138':SkyCoord('05:21:09.886021 +16:38:22.051220', 
+           '3C138':SkyCoord('05:21:09.886021 +16:38:22.051220', 
                                     unit=(u.hourangle, u.deg))}
 
 
@@ -79,12 +69,12 @@ meerkat = Observer(name='MeerKAT',
 
 
 # Time range- test
-time_range = Time(["2023-02-01 00:00", "2023-02-01 23:59"])
+time_range = Time(["2024-09-15 00:00", "2024-09-15 23:59"])
 
 
 
 # Read targets, calibrators and a make a list of Skycoord objects
-targets_df = pd.read_csv('MMGPS-SBAND_pointing_grid_final.csv')
+targets_df = pd.read_csv('MMGPS_UHF_Survey_Grid_final.csv')
 targets_df = targets_df[['Pointing', 'RA', 'Dec']]
 target_table = Table.from_pandas(targets_df)
 targets_ra = targets_df['RA'].values
@@ -99,6 +89,7 @@ for key, value in flux_cal.items():
 pol_cal_list = []
 for key, value in pol_cal.items():
     pol_cal_list.append(FixedTarget(coord = value, name=key))
+
 
 phase_cal_list = []
 phase_cal_ra = []
@@ -120,14 +111,14 @@ targets = [FixedTarget(coord=SkyCoord(ra=ra, dec=dec, unit=(u.hourangle, u.deg))
 
 
 # Define exposure times for target and calibrators
-target_exposure = 1257 * u.second
+target_exposure = 505 * u.second
 pol_calib_exposure = 300 * u.second
-flux_calib_exposure = 300 * u.second
+flux_calib_exposure = 600 * u.second
 phase_cal_exposure = 300 * u.second
 
 #Observing block
 blocks = []
-fixed_time = Time("2023-02-02 08:00:00")
+fixed_time = Time("2024-09-15 08:00:00")
 
 rise_set_time_df_target = []
 rise_set_time_df_phase_cal = []

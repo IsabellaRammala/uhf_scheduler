@@ -1,0 +1,533 @@
+{
+    "name": "",
+    "id": 0,
+    "description": "MPIfR Galactic Plane Survey S-band: Setup 20240717_1",
+    "proposal_id": "SCI-20200703-MK-03",
+    "state": "DRAFT",
+    "owner": "Isabella Rammala",
+    "owner_email": "irammala@mpifr-bonn.mpg.de",
+    "sb_id": 0,
+    "calendar_event_url": null,
+    "instrument": {
+        "enabled": true,
+        "product": "c544M4k",
+        "integration_time": "8.0",
+        "band": "u",
+        "pool_resources": [
+            "apsuse",
+            "cbf",
+            "fbfuse",
+            "sdp",
+            "tuse"
+        ],
+        "center_freq": "815.50",
+        "config_auth_host": "TRAPUM"
+    },
+    "noise_diode": {
+        "enabled": false,
+        "pattern": "all",
+        "on_fraction": null,
+        "cycle_len": null
+    },
+    "horizon": 20.0,
+    "lst_start": "05:59",
+    "lst_start_end": "14:31",
+    "desired_start_time": "2024-07-10 09:19:03.050485",
+    "duration": "",
+    "blocks": [
+        {
+            "name": "Setup 20240717_1",
+            "repeat": 1,
+            "targets": [
+                {
+                    "name": "J0408-6545",
+                    "ra": "04:08:20.3782",
+                    "dec": "-65:45:09.08",
+                    "tags": [
+                        "delaycal",
+                        "fluxcal",
+                        "bpcal"
+                    ],
+                    "type": "track",
+                    "duration": 300
+                },
+                {
+                    "name": "3C138",
+                    "ra": "05:21:09.886021",
+                    "dec": "+16:38:22.05122",
+                    "tags": [
+                        "polcal"
+                    ],
+                    "type": "track",
+                    "duration": 300
+                },
+                {
+                    "name": "J0906-6829",
+                    "ra": "09:06:52.44",
+                    "dec": "-68:29:39.8",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0035",
+                    "ra": "10:02:54.55",
+                    "dec": "-56:25:39.82",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J0906-6829",
+                    "ra": "09:06:52.44",
+                    "dec": "-68:29:39.8",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0036",
+                    "ra": "10:03:08.97",
+                    "dec": "-56:08:28.21",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J0906-6829",
+                    "ra": "09:06:52.44",
+                    "dec": "-68:29:39.8",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0113",
+                    "ra": "10:15:09.36",
+                    "dec": "-57:18:37.34",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J0906-6829",
+                    "ra": "09:06:52.44",
+                    "dec": "-68:29:39.8",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0197",
+                    "ra": "10:35:31.2",
+                    "dec": "-56:58:21.74",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J0906-6829",
+                    "ra": "09:06:52.44",
+                    "dec": "-68:29:39.8",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0264",
+                    "ra": "10:39:36.43",
+                    "dec": "-60:08:26.74",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J0906-6829",
+                    "ra": "09:06:52.44",
+                    "dec": "-68:29:39.8",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "3C138",
+                    "ra": "05:21:09.886021",
+                    "dec": "+16:38:22.05122",
+                    "tags": [
+                        "polcal"
+                    ],
+                    "type": "track",
+                    "duration": 300
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0363",
+                    "ra": "10:58:32.61",
+                    "dec": "-61:19:02.68",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0473",
+                    "ra": "11:21:09.97",
+                    "dec": "-62:25:10.17",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0562",
+                    "ra": "11:39:44.93",
+                    "dec": "-62:50:54.2",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0662",
+                    "ra": "12:03:47.87",
+                    "dec": "-63:14:00.28",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0770",
+                    "ra": "12:28:58.57",
+                    "dec": "-64:07:14.38",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0847",
+                    "ra": "12:47:29.54",
+                    "dec": "-64:13:27.17",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0926",
+                    "ra": "13:05:47.64",
+                    "dec": "-63:41:00.47",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "J0408-6545",
+                    "ra": "04:08:20.3782",
+                    "dec": "-65:45:09.08",
+                    "tags": [
+                        "delaycal",
+                        "fluxcal",
+                        "bpcal"
+                    ],
+                    "type": "track",
+                    "duration": 300
+                },
+                {
+                    "name": "MSGPS_S_1034",
+                    "ra": "13:32:15.12",
+                    "dec": "-63:52:20.21",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_1155",
+                    "ra": "14:00:06.36",
+                    "dec": "-63:12:11.46",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1424-4913",
+                    "ra": "14:24:32",
+                    "dec": "-49:13:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "J1744-5144",
+                    "ra": "17:44:25",
+                    "dec": "-51:44:44",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_1331",
+                    "ra": "14:37:46.43",
+                    "dec": "-61:40:08.11",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1744-5144",
+                    "ra": "17:44:25",
+                    "dec": "-51:44:44",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_1540",
+                    "ra": "15:17:05.51",
+                    "dec": "-59:06:50.01",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1744-5144",
+                    "ra": "17:44:25",
+                    "dec": "-51:44:44",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_1760",
+                    "ra": "15:52:00.15",
+                    "dec": "-55:45:15.27",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1744-5144",
+                    "ra": "17:44:25",
+                    "dec": "-51:44:44",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_1969",
+                    "ra": "16:19:43.75",
+                    "dec": "-52:05:27.82",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1744-5144",
+                    "ra": "17:44:25",
+                    "dec": "-51:44:44",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "J1733-1304",
+                    "ra": "17:33:03",
+                    "dec": "-13:04:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0037",
+                    "ra": "10:05:02.69",
+                    "dec": "-56:01:32.65",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1733-1304",
+                    "ra": "17:33:03",
+                    "dec": "-13:04:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                },
+                {
+                    "name": "MSGPS_S_0038",
+                    "ra": "10:05:16.02",
+                    "dec": "-55:44:20.13",
+                    "tags": [
+                        "target"
+                    ],
+                    "type": "track",
+                    "duration": 1257
+                },
+                {
+                    "name": "J1733-1304",
+                    "ra": "17:33:03",
+                    "dec": "-13:04:50",
+                    "tags": [
+                        "gaincal"
+                    ],
+                    "type": "track",
+                    "duration": 120
+                }
+            ]
+        }
+    ],
+    "activities": [],
+    "flux_bandpass_calibrators": [],
+    "polarisation_calibrators": [],
+    "isYamlObservation": false
+}

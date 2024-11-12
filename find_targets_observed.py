@@ -27,7 +27,7 @@ cnx = create_engine(postgres_str)
 
 
 
-file_type_pattern = "'MSGPS_S_%%'"
+file_type_pattern = "'MSGPS_UHF_%%'"
 
 
 
@@ -46,5 +46,3 @@ print(printable_query)
 df = pd.read_sql_query(query_get_filterbank_files, con=cnx)
 
 df.to_csv('mmgps_sband_observed.csv', index=False)
-
-
