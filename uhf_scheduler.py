@@ -223,7 +223,7 @@ def get_available_target_now(target_df, target_exposure_time, current_time_utc, 
     target_df['Rise_time_sidereal_50_deg_minus_target_scan'] = target_df['Rise_time_sidereal_50_deg']
     target_df['Set_time_sidereal_20_deg_minus_target_scan'] = target_df['Set_time_sidereal_20_deg']
 
-    target_df['Rise_time_sidereal_50_deg_minus_target_scan'] = target_df['Rise_time_sidereal_50_deg'] - datetime.timedelta(seconds=target_exposure_time)
+    target_df['Rise_time_sidereal_50_deg_minus_target_scan'] = target_df['Rise_time_sidereal_50_deg'] + datetime.timedelta(seconds=target_exposure_time) #BIG HACK!
     target_df['Set_time_sidereal_20_deg_minus_target_scan'] = target_df['Set_time_sidereal_20_deg'] - datetime.timedelta(seconds=target_exposure_time)
 
 
@@ -233,12 +233,16 @@ def get_available_target_now(target_df, target_exposure_time, current_time_utc, 
         & (target_df['Rise_time_sidereal_50_deg_minus_target_scan'] > current_time_lst)) | \
             ((target_df['Set_time_sidereal_20_deg_minus_target_scan'] > current_time_lst) \
         & (target_df['Set_time_sidereal_50_deg'] < current_time_lst)))]
+    #print(current_time_utc, current_time_lst)
+    #print (f'targets_available: {len(targets_available)}')
+
     
     # Convert the targets observed list to a list of names
     targets_observed_names = [x[0] for x in targets_observed]
     
     # Remove the targets that have already been observed
     targets_available = targets_available.loc[~targets_available['Pointing'].isin(targets_observed_names)]
+    #print (f'targets_available after filter: {len(targets_available)}')
 
     if targets_available.empty:
         raise ValueError(f"Error: No target available at {current_time_utc} (UTC), {current_time_lst} (LST). \
