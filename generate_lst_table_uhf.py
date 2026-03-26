@@ -27,6 +27,23 @@ mkt_location = {
 	    "timezone": "Africa/Johannesburg",
 	    "aliases": ["MeerKAT"]}
 
+# UHF GAIN CALIBRATORS FROM ARITRA's list
+phase_cals = {"J1424-4913":SkyCoord("14:24:32 -49:13:50",
+                                    unit=(u.hourangle, u.deg)),
+              "J1726-5529":SkyCoord("17:26:50 -55:29:40",
+                                    unit=(u.hourangle, u.deg)),
+              "J1733-1304":SkyCoord("17:33:03 -13:04:50",
+                                    unit=(u.hourangle, u.deg)),
+              "J1744-5144":SkyCoord("17:44:25 -51:44:44",
+                                    unit=(u.hourangle, u.deg)),
+              "J1819-6345":SkyCoord("18:19:35 -63:45:48",
+                                    unit=(u.hourangle, u.deg)),
+              "J1830-3602":SkyCoord("18:30:59 -36:02:30",
+                                    unit=(u.hourangle, u.deg)),
+              "J1833-2103":SkyCoord("18:33:40 -21:03:40",
+                                    unit=(u.hourangle, u.deg)),
+              }
+'''              
 phase_cals = {"J1218-4600":SkyCoord("12:18:06 -46:00:29",
                                     unit=(u.hourangle, u.deg)),
               "J1424-4913":SkyCoord("14:24:32 -49:13:50",
@@ -44,7 +61,7 @@ phase_cals = {"J1218-4600":SkyCoord("12:18:06 -46:00:29",
               "J1833-2103":SkyCoord("18:33:40 -21:03:40",
                                     unit=(u.hourangle, u.deg)),
               }
-
+'''
 flux_cal = {'J1939-6342':SkyCoord('19:39:25.0264 -63:42:45.625', 
                                     unit=(u.hourangle, u.deg)),
             'J0408-6545':SkyCoord('04:08:20.3782 -65:45:9.080', 
@@ -69,7 +86,7 @@ meerkat = Observer(name='MeerKAT',
 
 
 # Time range- test
-time_range = Time(["2024-09-15 00:00", "2024-09-15 23:59"])
+time_range = Time(["2026-03-30 00:00", "2026-12-31 23:59"])
 
 
 
